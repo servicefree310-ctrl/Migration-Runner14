@@ -53,15 +53,25 @@ run_sql_file() {
 
   echo -e "   → Running: ${label}"
 
-  # Strip drizzle -->statement-breakpoint markers, then pipe to psql
-  sed 's/--> statement-breakpoint//g' "$file" | \
-    psql "$DATABASE_URL" --quiet --set ON_ERROR_STOP=1 2>&1
+  local tmpout
+  tmpout=$(mktemp)
 
-  if [ $? -eq 0 ]; then
-    echo -e "      ${GREEN}✓ done${NC}"
-  else
-    echo -e "      ${RED}✗ FAILED${NC}"
+  # Strip drizzle -->statement-breakpoint markers, run without ON_ERROR_STOP
+  # so "already exists" errors don't abort — only real errors will fail.
+  sed 's/--> statement-breakpoint//g' "$file" | \
+    psql "$DATABASE_URL" --quiet 2>&1 | tee "$tmpout"
+
+  # Filter out idempotent notices; fail only on real errors
+  local real_errors
+  real_errors=$(grep -i "^ERROR" "$tmpout" | grep -iv "already exists" || true)
+  rm -f "$tmpout"
+
+  if [ -n "$real_errors" ]; then
+    echo -e "      ${RED}✗ FAILED — real errors:${NC}"
+    echo "$real_errors"
     exit 1
+  else
+    echo -e "      ${GREEN}✓ done${NC}"
   fi
 }
 
