@@ -79,7 +79,17 @@ run_sql_statement() {
   local label="$1"
   local sql="$2"
   echo -e "   → ${label}"
-  echo "$sql" | psql "$DATABASE_URL" --quiet --set ON_ERROR_STOP=1 2>&1
+  local tmpout
+  tmpout=$(mktemp)
+  echo "$sql" | psql "$DATABASE_URL" --quiet 2>&1 | tee "$tmpout"
+  local real_errors
+  real_errors=$(grep -i "^ERROR" "$tmpout" | grep -iv "already exists" || true)
+  rm -f "$tmpout"
+  if [ -n "$real_errors" ]; then
+    echo -e "      ${RED}✗ FAILED — real errors:${NC}"
+    echo "$real_errors"
+    exit 1
+  fi
   echo -e "      ${GREEN}✓ done${NC}"
 }
 
@@ -114,9 +124,19 @@ if [ -f "$MIGRATION_0002" ]; then
     done
 
   # Run the rest (excluding ALTER TYPE ADD VALUE lines)
+  local tmpout
+  tmpout=$(mktemp)
   grep -v "ALTER TYPE.*ADD VALUE" "$MIGRATION_0002" | \
     sed 's/--> statement-breakpoint//g' | \
-    psql "$DATABASE_URL" --quiet --set ON_ERROR_STOP=1 2>&1
+    psql "$DATABASE_URL" --quiet 2>&1 | tee "$tmpout"
+  local real_errors
+  real_errors=$(grep -i "^ERROR" "$tmpout" | grep -iv "already exists" || true)
+  rm -f "$tmpout"
+  if [ -n "$real_errors" ]; then
+    echo -e "      ${RED}✗ FAILED — real errors:${NC}"
+    echo "$real_errors"
+    exit 1
+  fi
   echo -e "      ${GREEN}✓ done${NC}"
 fi
 
