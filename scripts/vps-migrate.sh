@@ -21,7 +21,14 @@ RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 if [ -z "$DATABASE_URL" ]; then
   ENV_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.env"
   if [ -f "$ENV_FILE" ]; then
-    export $(grep -v '^#' "$ENV_FILE" | grep '=' | xargs)
+    while IFS= read -r line || [ -n "$line" ]; do
+      [[ -z "$line" || "$line" == \#* ]] && continue
+      [[ "$line" != *=* ]] && continue
+      key="${line%%=*}"
+      val="${line#*=}"
+      [[ -z "$key" ]] && continue
+      export "$key=$val"
+    done < "$ENV_FILE"
     echo "   Loaded .env from $ENV_FILE"
   fi
 fi
