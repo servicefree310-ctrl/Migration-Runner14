@@ -124,17 +124,15 @@ if [ -f "$MIGRATION_0002" ]; then
     done
 
   # Run the rest (excluding ALTER TYPE ADD VALUE lines)
-  local tmpout
-  tmpout=$(mktemp)
+  _tmpout=$(mktemp)
   grep -v "ALTER TYPE.*ADD VALUE" "$MIGRATION_0002" | \
     sed 's/--> statement-breakpoint//g' | \
-    psql "$DATABASE_URL" --quiet 2>&1 | tee "$tmpout"
-  local real_errors
-  real_errors=$(grep -i "^ERROR" "$tmpout" | grep -iv "already exists" || true)
-  rm -f "$tmpout"
-  if [ -n "$real_errors" ]; then
+    psql "$DATABASE_URL" --quiet 2>&1 | tee "$_tmpout"
+  _real_errors=$(grep -i "^ERROR" "$_tmpout" | grep -iv "already exists" || true)
+  rm -f "$_tmpout"
+  if [ -n "$_real_errors" ]; then
     echo -e "      ${RED}✗ FAILED — real errors:${NC}"
-    echo "$real_errors"
+    echo "$_real_errors"
     exit 1
   fi
   echo -e "      ${GREEN}✓ done${NC}"
