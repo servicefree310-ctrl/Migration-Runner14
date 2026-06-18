@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
-    "seed:coins": "echo 'Run: pnpm --filter @workspace/api-server run seed'",
+    "seed:coins": "tsx ./src/seed-coins.ts",
     "seed:admin": "tsx ./src/seed-admin.ts",
     "seed:bots": "tsx ./src/seed-bots.ts",
     "seed:ai-plans": "tsx ./src/seed-ai-plans.ts",
     "seed:earn": "tsx ./src/seed-earn-plans.ts",
     "seed:kyc": "tsx ./src/seed-kyc-settings.ts",
     "seed:ai-accounts": "tsx ./src/seed-ai-accounts.ts",
-    "seed:all": "tsx ./src/seed-admin.ts && tsx ./src/seed-bots.ts && tsx ./src/seed-ai-plans.ts && tsx ./src/seed-earn-plans.ts && tsx ./src/seed-kyc-settings.ts",
+    "seed:all": "tsx ./src/seed-all.ts",
     "check:users": "tsx ./src/check-users.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
