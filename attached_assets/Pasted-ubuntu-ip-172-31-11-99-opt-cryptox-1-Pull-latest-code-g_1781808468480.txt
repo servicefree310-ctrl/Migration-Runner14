@@ -1,0 +1,815 @@
+ubuntu@ip-172-31-11-99:/opt/cryptox$ # 1. Pull latest code
+git pull
+
+# 2. Install dependencies
+pnpm install --frozen-lockfile
+
+# 3. Run all migrations
+bash scripts/vps-migrate.sh
+
+# 4. Run all seeds
+pnpm --filter @workspace/scripts run seed:all
+
+# 5. Build all apps
+pnpm run build
+
+# 6. Start API server (background)
+pm2 start "pnpm --filter @workspace/api-server run start" --name api-server
+
+# 7. Start Admin panel (background)
+pm2 start "PORT=23744 BASE_PATH=/admin/ pnpm --filter @workspace/admin run start" --name admin
+
+# 8. Start User portal (background)
+pm2 start "PORT=23475 BASE_PATH=/user/ pnpm --filter @workspace/user-portal run start" --name user-portal
+
+# 9. Save pm2 so it restarts on reboot
+pm2 save
+pm2 startup
+remote: Enumerating objects: 12, done.
+remote: Counting objects: 100% (12/12), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 7 (delta 5), reused 7 (delta 5), pack-reused 0 (from 0)
+Unpacking objects: 100% (7/7), 5.08 KiB | 2.54 MiB/s, done.
+From https://github.com/servicefree310-ctrl/Migration-Runner14
+   8aa8282..94e5f86  main       -> origin/main
+Updating 8aa8282..94e5f86
+Fast-forward
+ ...buntu-ip-172-31-11-99-opt-cryptox-git-pull-bash-script_1781808190309.txt | 410 ++++++++++++++++++++++++++++++++++++
+ scripts/src/seed-coins.ts                                                   |  58 ++---
+ 2 files changed, 444 insertions(+), 24 deletions(-)
+ create mode 100644 attached_assets/Pasted-ubuntu-ip-172-31-11-99-opt-cryptox-git-pull-bash-script_1781808190309.txt
+Scope: all 12 workspace projects
+ ERR_PNPM_LOCKFILE_CONFIG_MISMATCH  Cannot proceed with the frozen installation. The current "overrides" configuration doesn't match the value found in the lockfile
+
+Update your lockfile using "pnpm install --no-frozen-lockfile"
+   Loaded .env from /opt/cryptox/.env
+
+============================================================
+ Zebvix — Full Database Migration
+ Target: postgresql://zebvix:Tyagi00%40123@localhost:5432/zebvixdb
+============================================================
+
+[Phase 1] Drizzle base schema
+   → Running: 0000 — base schema (all tables + enums)
+ERROR:  type "ai_sub_status" already exists
+ERROR:  type "risk_level" already exists
+ERROR:  type "inr_method" already exists
+ERROR:  type "inr_tx_status" already exists
+ERROR:  type "inr_tx_type" already exists
+ERROR:  type "msg_sender_type" already exists
+ERROR:  type "ticket_category" already exists
+ERROR:  type "ticket_priority" already exists
+ERROR:  type "ticket_status" already exists
+ERROR:  type "activity_type" already exists
+ERROR:  type "ledger_type" already exists
+ERROR:  relation "users" already exists
+ERROR:  relation "audit_logs" already exists
+ERROR:  relation "login_logs" already exists
+ERROR:  relation "sessions" already exists
+ERROR:  relation "kyc_records" already exists
+ERROR:  relation "kyc_settings" already exists
+ERROR:  relation "bank_accounts" already exists
+ERROR:  relation "coins" already exists
+ERROR:  relation "networks" already exists
+ERROR:  relation "pairs" already exists
+ERROR:  relation "custom_apis" already exists
+ERROR:  relation "email_configs" already exists
+ERROR:  relation "gateways" already exists
+ERROR:  relation "otp_providers" already exists
+ERROR:  relation "crypto_addresses" already exists
+ERROR:  relation "wallets" already exists
+ERROR:  relation "crypto_deposits" already exists
+ERROR:  relation "crypto_withdrawals" already exists
+ERROR:  relation "inr_deposits" already exists
+ERROR:  relation "inr_withdrawals" already exists
+ERROR:  relation "transfers" already exists
+ERROR:  relation "otp_codes" already exists
+ERROR:  relation "orders" already exists
+ERROR:  relation "trades" already exists
+ERROR:  relation "earn_positions" already exists
+ERROR:  relation "earn_products" already exists
+ERROR:  relation "announcements" already exists
+ERROR:  relation "home_banners" already exists
+ERROR:  relation "broadcast_notifications" already exists
+ERROR:  relation "cache_configs" already exists
+ERROR:  relation "chat_messages" already exists
+ERROR:  relation "chat_threads" already exists
+ERROR:  relation "competitions" already exists
+ERROR:  relation "legal_pages" already exists
+ERROR:  relation "news_items" already exists
+ERROR:  relation "home_promotions" already exists
+ERROR:  relation "referrals" already exists
+ERROR:  relation "app_settings" already exists
+ERROR:  relation "deposit_addresses" already exists
+ERROR:  relation "wallet_addresses" already exists
+ERROR:  relation "admin_api_keys" already exists
+ERROR:  relation "funding_rates" already exists
+ERROR:  relation "market_bots" already exists
+ERROR:  relation "funding_payments" already exists
+ERROR:  relation "futures_orders" already exists
+ERROR:  relation "futures_positions" already exists
+ERROR:  relation "futures_trades" already exists
+ERROR:  relation "user_api_keys" already exists
+ERROR:  relation "option_contracts" already exists
+ERROR:  relation "option_orders" already exists
+ERROR:  relation "option_positions" already exists
+ERROR:  relation "web3_bridges" already exists
+ERROR:  relation "web3_networks" already exists
+ERROR:  relation "web3_swaps" already exists
+ERROR:  relation "web3_tokens" already exists
+ERROR:  relation "web3_wallets" already exists
+ERROR:  relation "listing_candidates" already exists
+ERROR:  relation "listing_rules" already exists
+ERROR:  relation "listing_sources" already exists
+ERROR:  relation "price_alerts" already exists
+ERROR:  relation "user_notifications" already exists
+ERROR:  relation "bot_trades" already exists
+ERROR:  relation "trading_bots" already exists
+ERROR:  relation "copy_relations" already exists
+ERROR:  relation "trader_profiles" already exists
+ERROR:  relation "dashboard_layouts" already exists
+ERROR:  relation "watchlists" already exists
+ERROR:  relation "p2p_disputes" already exists
+ERROR:  relation "p2p_messages" already exists
+ERROR:  relation "p2p_offers" already exists
+ERROR:  relation "p2p_orders" already exists
+ERROR:  relation "p2p_payment_methods" already exists
+ERROR:  relation "convert_quotes" already exists
+ERROR:  relation "broker_config" already exists
+ERROR:  relation "instrument_orders" already exists
+ERROR:  relation "instrument_positions" already exists
+ERROR:  relation "instruments" already exists
+ERROR:  relation "broker_accounts" already exists
+ERROR:  relation "broker_kyc_docs" already exists
+ERROR:  relation "broker_orders" already exists
+ERROR:  relation "broker_portfolio" already exists
+ERROR:  relation "mt5_accounts" already exists
+ERROR:  relation "mt5_orders" already exists
+ERROR:  relation "smartapi_accounts" already exists
+ERROR:  relation "ai_trading_earnings" already exists
+ERROR:  relation "ai_trading_plans" already exists
+ERROR:  relation "ai_trading_subscriptions" already exists
+ERROR:  relation "inr_transactions" already exists
+ERROR:  relation "master_wallets" already exists
+ERROR:  relation "support_tickets" already exists
+ERROR:  relation "ticket_messages" already exists
+ERROR:  relation "exchange_settings" already exists
+ERROR:  relation "fee_config" already exists
+ERROR:  relation "activity_events" already exists
+ERROR:  relation "wallet_ledger" already exists
+ERROR:  constraint "listing_candidates_rule_id_listing_rules_id_fk" for relation "listing_candidates" already exists
+ERROR:  constraint "listing_candidates_decided_by_users_id_fk" for relation "listing_candidates" already exists
+ERROR:  constraint "listing_candidates_listed_coin_id_coins_id_fk" for relation "listing_candidates" already exists
+ERROR:  constraint "listing_candidates_listed_token_id_web3_tokens_id_fk" for relation "listing_candidates" already exists
+ERROR:  constraint "listing_candidates_listed_network_id_web3_networks_id_fk" for relation "listing_candidates" already exists
+ERROR:  constraint "broker_accounts_user_id_users_id_fk" for relation "broker_accounts" already exists
+ERROR:  constraint "broker_kyc_docs_broker_account_id_broker_accounts_id_fk" for relation "broker_kyc_docs" already exists
+ERROR:  constraint "broker_orders_user_id_users_id_fk" for relation "broker_orders" already exists
+ERROR:  constraint "broker_orders_broker_account_id_broker_accounts_id_fk" for relation "broker_orders" already exists
+ERROR:  constraint "broker_portfolio_user_id_users_id_fk" for relation "broker_portfolio" already exists
+ERROR:  constraint "broker_portfolio_broker_account_id_broker_accounts_id_fk" for relation "broker_portfolio" already exists
+ERROR:  constraint "mt5_accounts_user_id_users_id_fk" for relation "mt5_accounts" already exists
+ERROR:  constraint "mt5_orders_user_id_users_id_fk" for relation "mt5_orders" already exists
+ERROR:  constraint "mt5_orders_mt5_account_id_mt5_accounts_id_fk" for relation "mt5_orders" already exists
+ERROR:  constraint "smartapi_accounts_user_id_users_id_fk" for relation "smartapi_accounts" already exists
+ERROR:  constraint "ai_trading_earnings_user_id_users_id_fk" for relation "ai_trading_earnings" already exists
+NOTICE:  identifier "ai_trading_earnings_subscription_id_ai_trading_subscriptions_id_fk" will be truncated to "ai_trading_earnings_subscription_id_ai_trading_subscriptions_id"
+ERROR:  constraint "ai_trading_earnings_subscription_id_ai_trading_subscriptions_id" for relation "ai_trading_earnings" already exists
+ERROR:  constraint "ai_trading_subscriptions_user_id_users_id_fk" for relation "ai_trading_subscriptions" already exists
+ERROR:  constraint "ai_trading_subscriptions_plan_id_ai_trading_plans_id_fk" for relation "ai_trading_subscriptions" already exists
+ERROR:  constraint "inr_transactions_user_id_users_id_fk" for relation "inr_transactions" already exists
+ERROR:  constraint "support_tickets_user_id_users_id_fk" for relation "support_tickets" already exists
+ERROR:  constraint "support_tickets_agent_id_users_id_fk" for relation "support_tickets" already exists
+ERROR:  constraint "ticket_messages_ticket_id_support_tickets_id_fk" for relation "ticket_messages" already exists
+ERROR:  constraint "ticket_messages_sender_id_users_id_fk" for relation "ticket_messages" already exists
+ERROR:  constraint "wallet_ledger_user_id_users_id_fk" for relation "wallet_ledger" already exists
+ERROR:  constraint "wallet_ledger_coin_id_coins_id_fk" for relation "wallet_ledger" already exists
+ERROR:  relation "wallets_user_type_coin_idx" already exists
+ERROR:  relation "crypto_deposits_tx_log_uniq" already exists
+ERROR:  relation "orders_user_id_idx" already exists
+ERROR:  relation "orders_pair_id_idx" already exists
+ERROR:  relation "orders_status_idx" already exists
+ERROR:  relation "orders_user_status_idx" already exists
+ERROR:  relation "orders_pair_status_idx" already exists
+ERROR:  relation "trades_user_id_idx" already exists
+ERROR:  relation "trades_pair_id_idx" already exists
+ERROR:  relation "trades_order_id_idx" already exists
+ERROR:  relation "trades_created_at_idx" already exists
+ERROR:  relation "deposit_addresses_uniq" already exists
+ERROR:  relation "wallet_addresses_user_network_uniq" already exists
+ERROR:  relation "market_bots_pair_unique" already exists
+ERROR:  relation "funding_payments_rate_pos_idx" already exists
+ERROR:  relation "futures_orders_pair_status_idx" already exists
+ERROR:  relation "futures_orders_user_created_idx" already exists
+ERROR:  relation "futures_trades_pair_created_idx" already exists
+ERROR:  relation "futures_trades_taker_user_idx" already exists
+ERROR:  relation "futures_trades_maker_user_idx" already exists
+ERROR:  relation "option_contracts_status_expiry_idx" already exists
+ERROR:  relation "option_contracts_underlying_idx" already exists
+ERROR:  relation "option_orders_user_idx" already exists
+ERROR:  relation "option_orders_contract_idx" already exists
+ERROR:  relation "option_positions_user_idx" already exists
+ERROR:  relation "option_positions_open_uniq_idx" already exists
+ERROR:  relation "web3_bridges_user_idx" already exists
+ERROR:  relation "web3_swaps_user_idx" already exists
+ERROR:  relation "web3_tokens_network_symbol_idx" already exists
+ERROR:  relation "web3_tokens_network_idx" already exists
+ERROR:  relation "web3_wallets_user_addr_idx" already exists
+ERROR:  relation "web3_wallets_user_idx" already exists
+ERROR:  relation "listing_candidates_uniq_idx" already exists
+ERROR:  relation "listing_candidates_status_idx" already exists
+ERROR:  relation "listing_candidates_symbol_idx" already exists
+ERROR:  relation "listing_rules_active_priority_idx" already exists
+ERROR:  relation "listing_sources_uniq_idx" already exists
+ERROR:  relation "price_alerts_user_status_idx" already exists
+ERROR:  relation "price_alerts_symbol_status_idx" already exists
+ERROR:  relation "user_notif_user_created_idx" already exists
+ERROR:  relation "user_notif_user_unread_idx" already exists
+ERROR:  relation "bot_trades_bot_idx" already exists
+ERROR:  relation "bots_user_status_idx" already exists
+ERROR:  relation "bots_status_idx" already exists
+ERROR:  relation "copy_rel_follower_trader_idx" already exists
+ERROR:  relation "copy_rel_trader_status_idx" already exists
+ERROR:  relation "trader_profiles_active_pnl_idx" already exists
+ERROR:  relation "dashboard_layouts_user_name_idx" already exists
+ERROR:  relation "watchlists_user_name_idx" already exists
+ERROR:  relation "p2p_dispute_status_idx" already exists
+ERROR:  relation "p2p_dispute_buyer_idx" already exists
+ERROR:  relation "p2p_dispute_seller_idx" already exists
+ERROR:  relation "p2p_msg_order_idx" already exists
+ERROR:  relation "p2p_offer_user_idx" already exists
+ERROR:  relation "p2p_offer_coin_side_idx" already exists
+ERROR:  relation "p2p_order_buyer_idx" already exists
+ERROR:  relation "p2p_order_seller_idx" already exists
+ERROR:  relation "p2p_order_offer_idx" already exists
+ERROR:  relation "p2p_order_status_idx" already exists
+ERROR:  relation "p2p_pm_user_idx" already exists
+ERROR:  relation "wallet_ledger_user_idx" already exists
+ERROR:  relation "wallet_ledger_coin_idx" already exists
+ERROR:  relation "wallet_ledger_type_idx" already exists
+ERROR:  relation "wallet_ledger_created_idx" already exists
+      ✓ done
+   → Running: 0001 — additional indexes
+ERROR:  relation "kyc_records_user_level_uniq" already exists
+ERROR:  relation "kyc_records_user_status_idx" already exists
+ERROR:  relation "bank_accounts_user_idx" already exists
+ERROR:  relation "crypto_withdrawals_user_idx" already exists
+ERROR:  relation "crypto_withdrawals_status_idx" already exists
+ERROR:  relation "inr_deposits_user_idx" already exists
+ERROR:  relation "inr_deposits_status_idx" already exists
+ERROR:  relation "inr_withdrawals_user_idx" already exists
+ERROR:  relation "inr_withdrawals_status_idx" already exists
+ERROR:  relation "transfers_user_idx" already exists
+ERROR:  relation "otp_codes_recipient_purpose_idx" already exists
+ERROR:  relation "earn_positions_user_idx" already exists
+ERROR:  relation "earn_positions_product_idx" already exists
+ERROR:  relation "chat_messages_thread_idx" already exists
+ERROR:  relation "chat_threads_user_idx" already exists
+ERROR:  relation "referrals_referrer_idx" already exists
+ERROR:  relation "referrals_referred_idx" already exists
+ERROR:  relation "funding_payments_user_idx" already exists
+ERROR:  relation "funding_payments_pair_idx" already exists
+ERROR:  relation "futures_positions_user_status_idx" already exists
+ERROR:  relation "futures_positions_pair_idx" already exists
+ERROR:  relation "convert_quotes_user_status_idx" already exists
+      ✓ done
+   → 0002 — new tables + enum additions
+ERROR:  relation "company_media" already exists
+ERROR:  relation "team_members" already exists
+ERROR:  relation "conversations" already exists
+ERROR:  relation "messages" already exists
+ERROR:  column "stop_loss" of relation "futures_positions" already exists
+ERROR:  column "take_profit" of relation "futures_positions" already exists
+ERROR:  column "pnl_all_time_pct" of relation "trader_profiles" already exists
+ERROR:  column "max_drawdown_pct" of relation "trader_profiles" already exists
+ERROR:  column "funding_coin_id" of relation "ai_trading_subscriptions" already exists
+ERROR:  column "funding_amount" of relation "ai_trading_subscriptions" already exists
+ERROR:  constraint "messages_conversation_id_conversations_id_fk" for relation "messages" already exists
+ERROR:  constraint "ai_trading_subscriptions_funding_coin_id_coins_id_fk" for relation "ai_trading_subscriptions" already exists
+      ✓ done
+   → Running: 0003 — referrals source_ref column
+ERROR:  column "source_ref_id" of relation "referrals" already exists
+ERROR:  relation "referrals_source_ref_idx" already exists
+      ✓ done
+
+[Phase 2] Incremental migrations (001 → 014)
+   → Running: 001 — bank_accounts unique verified constraint
+NOTICE:  relation "bank_accounts_one_verified_per_user" already exists, skipping
+      ✓ done
+   → Running: 002 — otp_codes table
+NOTICE:  relation "otp_codes" already exists, skipping
+NOTICE:  relation "otp_codes_recipient_purpose" already exists, skipping
+      ✓ done
+   → Running: 003 — futures_orders + futures_trades tables
+NOTICE:  relation "futures_orders" already exists, skipping
+NOTICE:  relation "futures_orders_pair_status_idx" already exists, skipping
+NOTICE:  relation "futures_orders_user_created_idx" already exists, skipping
+NOTICE:  relation "futures_trades" already exists, skipping
+NOTICE:  relation "futures_trades_pair_created_idx" already exists, skipping
+NOTICE:  relation "futures_trades_taker_user_idx" already exists, skipping
+NOTICE:  relation "futures_trades_maker_user_idx" already exists, skipping
+      ✓ done
+   → Running: 004 — CMS tables (announcements, news, competitions)
+NOTICE:  relation "announcements" already exists, skipping
+NOTICE:  relation "announcements_published_idx" already exists, skipping
+NOTICE:  relation "news_items" already exists, skipping
+NOTICE:  relation "news_items_published_idx" already exists, skipping
+NOTICE:  relation "competitions" already exists, skipping
+NOTICE:  relation "competitions_published_idx" already exists, skipping
+NOTICE:  relation "broadcast_notifications" already exists, skipping
+NOTICE:  relation "broadcast_notifications_active_idx" already exists, skipping
+      ✓ done
+   → Running: 005 — login OTP preferences columns
+NOTICE:  column "login_email_otp_enabled" of relation "users" already exists, skipping
+NOTICE:  column "login_phone_otp_enabled" of relation "users" already exists, skipping
+      ✓ done
+   → Running: 006 — trades TDS column
+NOTICE:  column "tds" of relation "trades" already exists, skipping
+      ✓ done
+   → Running: 007 — premium portal tables (bots, copy trading, dashboards)
+NOTICE:  relation "user_notifications" already exists, skipping
+NOTICE:  relation "user_notif_user_created_idx" already exists, skipping
+NOTICE:  relation "user_notif_user_unread_idx" already exists, skipping
+NOTICE:  relation "price_alerts" already exists, skipping
+NOTICE:  relation "price_alerts_user_status_idx" already exists, skipping
+NOTICE:  relation "price_alerts_symbol_status_idx" already exists, skipping
+NOTICE:  relation "trading_bots" already exists, skipping
+NOTICE:  relation "bots_user_status_idx" already exists, skipping
+NOTICE:  relation "bots_status_idx" already exists, skipping
+NOTICE:  relation "bot_trades" already exists, skipping
+NOTICE:  relation "bot_trades_bot_idx" already exists, skipping
+NOTICE:  relation "trader_profiles" already exists, skipping
+NOTICE:  relation "trader_profiles_active_pnl_idx" already exists, skipping
+NOTICE:  relation "copy_relations" already exists, skipping
+NOTICE:  relation "copy_rel_follower_trader_idx" already exists, skipping
+NOTICE:  relation "copy_rel_trader_status_idx" already exists, skipping
+NOTICE:  relation "dashboard_layouts" already exists, skipping
+NOTICE:  relation "dashboard_layouts_user_name_idx" already exists, skipping
+NOTICE:  relation "watchlists" already exists, skipping
+NOTICE:  relation "watchlists_user_name_idx" already exists, skipping
+      ✓ done
+   → Running: 008 — P2P escrow + disputes
+NOTICE:  column "p2p_locked" of relation "wallets" already exists, skipping
+NOTICE:  relation "p2p_payment_methods" already exists, skipping
+NOTICE:  relation "p2p_pm_user_idx" already exists, skipping
+NOTICE:  relation "p2p_offers" already exists, skipping
+NOTICE:  relation "p2p_offer_user_idx" already exists, skipping
+NOTICE:  relation "p2p_offer_coin_side_idx" already exists, skipping
+NOTICE:  relation "p2p_orders" already exists, skipping
+NOTICE:  relation "p2p_order_buyer_idx" already exists, skipping
+NOTICE:  relation "p2p_order_seller_idx" already exists, skipping
+NOTICE:  relation "p2p_order_offer_idx" already exists, skipping
+NOTICE:  relation "p2p_order_status_idx" already exists, skipping
+NOTICE:  relation "p2p_messages" already exists, skipping
+NOTICE:  relation "p2p_msg_order_idx" already exists, skipping
+NOTICE:  relation "p2p_disputes" already exists, skipping
+NOTICE:  relation "p2p_dispute_status_idx" already exists, skipping
+NOTICE:  relation "p2p_dispute_buyer_idx" already exists, skipping
+NOTICE:  relation "p2p_dispute_seller_idx" already exists, skipping
+      ✓ done
+   → Running: 009 — convert quotes table
+NOTICE:  relation "convert_quotes" already exists, skipping
+NOTICE:  relation "convert_quotes_user_idx" already exists, skipping
+NOTICE:  relation "convert_quotes_status_idx" already exists, skipping
+      ✓ done
+   → Running: 010 — trades is_taker column
+NOTICE:  column "is_taker" of relation "trades" already exists, skipping
+      ✓ done
+   → Running: 011 — auto-sweep columns
+NOTICE:  column "auto_sweep_enabled" of relation "networks" already exists, skipping
+NOTICE:  column "sweep_status" of relation "crypto_deposits" already exists, skipping
+NOTICE:  column "sweep_tx_hash" of relation "crypto_deposits" already exists, skipping
+NOTICE:  column "swept_at" of relation "crypto_deposits" already exists, skipping
+NOTICE:  relation "idx_crypto_deposits_sweep" already exists, skipping
+      ✓ done
+   → Running: 012 — instruments + broker tables
+NOTICE:  relation "broker_config" already exists, skipping
+NOTICE:  relation "instruments" already exists, skipping
+NOTICE:  relation "idx_instruments_asset_class" already exists, skipping
+NOTICE:  relation "idx_instruments_trading_enabled" already exists, skipping
+NOTICE:  relation "instrument_orders" already exists, skipping
+NOTICE:  relation "idx_instrument_orders_user_id" already exists, skipping
+NOTICE:  relation "idx_instrument_orders_status" already exists, skipping
+NOTICE:  relation "instrument_positions" already exists, skipping
+NOTICE:  relation "idx_instrument_positions_user_id" already exists, skipping
+NOTICE:  relation "idx_instrument_positions_status" already exists, skipping
+      ✓ done
+   → Running: 013 — broker accounts system
+NOTICE:  relation "broker_accounts" already exists, skipping
+NOTICE:  relation "broker_accounts_user_id_idx" already exists, skipping
+NOTICE:  relation "broker_kyc_docs" already exists, skipping
+NOTICE:  relation "broker_orders" already exists, skipping
+NOTICE:  relation "broker_portfolio" already exists, skipping
+      ✓ done
+   → Running: 014 — coins/networks/pairs performance indexes
+NOTICE:  relation "idx_coins_symbol" already exists, skipping
+NOTICE:  relation "idx_coins_type" already exists, skipping
+NOTICE:  relation "idx_coins_status" already exists, skipping
+NOTICE:  relation "idx_coins_is_listed" already exists, skipping
+NOTICE:  relation "idx_coins_market_rank" already exists, skipping
+NOTICE:  relation "idx_networks_coin_id" already exists, skipping
+NOTICE:  relation "idx_networks_chain" already exists, skipping
+NOTICE:  relation "idx_networks_status" already exists, skipping
+NOTICE:  relation "idx_pairs_symbol" already exists, skipping
+NOTICE:  relation "idx_pairs_base_coin_id" already exists, skipping
+NOTICE:  relation "idx_pairs_quote_coin_id" already exists, skipping
+NOTICE:  relation "idx_pairs_trading_enabled" already exists, skipping
+NOTICE:  relation "idx_pairs_status" already exists, skipping
+      ✓ done
+
+============================================================
+ ✅ All migrations complete!
+ Next: run the seed scripts to populate initial data.
+   bash scripts/vps-seed.sh
+============================================================
+
+
+> @workspace/scripts@0.0.0 seed:all /opt/cryptox/scripts
+> tsx ./src/seed-all.ts
+
+   Loaded .env from project root
+
+╔════════════════════════════════════════════════════════════╗
+║           Zebvix — Full VPS Seed (seed:all)               ║
+╚════════════════════════════════════════════════════════════╝
+
+Seeds run in dependency order.
+Each step is idempotent — safe to re-run on existing data.
+
+
+────────────────────────────────────────────────────────────
+🌱 Running: Step 1/7 — Coins, Networks & Pairs
+────────────────────────────────────────────────────────────
+🪙  Zebvix Coin + Pair Seed — starting…
+
+[1/3] Seeding 62 coins…
+
+   Coins: 0 created, 62 already existed
+
+[2/3] Seeding 29 networks…
+   Networks: 0 created, 29 already existed
+
+[3/3] Seeding 80 trading pairs…
+   ⚠  TONUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  SHIBUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  STXUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  THETAUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  FLOWUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  CAKEUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  KSMUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  WRXUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  ZBXUSDT: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  SHIBINR: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  WRXINR: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+   ⚠  ZBXINR: Failed query: insert into "pairs" ("id", "symbol", "base_coin_id", "quote_coin_id", "min_qty", "max_qty", "min_notional", "price_precision", "qty_precision", "taker_fee", "maker_fee", "trading_enabled", "futures_enabled", "trading_start_at", "futures_start_at", "last_price", "volume_24h", "quote_volume_24h", "high_24h", "low_24h", "change_24h", "trades_24h", "stats_override", "description", "status", "max_leverage", "market_slippage_pct", "mm_rate", "funding_interval_hours", "base_funding_rate", "funding_auto_create", "created_at") values (default, $1, $2, $3, $4, $5, default, $6, $7, $8, $9, $10, $11, default, default, $12, $13, $14, $15, $16, $17, $18, default, default, $19, $20, default, default, default, default, default, default)
+
+   Pairs: 0 created, 80 already existed
+
+✅ Coin + Pair seed complete!
+   Total: 62 coins | 29 networks | 80 pairs
+
+────────────────────────────────────────────────────────────
+🌱 Running: Step 2/7 — Admin User & Platform Wallets
+────────────────────────────────────────────────────────────
+🌱 Zebvix Admin Seed — starting…
+   Admin user already exists: id=1 role=admin
+   Ensuring 'spot' wallet rows for 108 coins…
+   ✅ Wallets: 9 created, 99 already existed
+
+✅ Admin seed complete. Bot user id: 1
+
+────────────────────────────────────────────────────────────
+🌱 Running: Step 3/7 — KYC Level Settings
+────────────────────────────────────────────────────────────
+🪪  KYC Settings seed — starting…
+   ✅ Level 1: Basic Verification — withdraw ₹0Cr/day, trade ₹1Cr/day
+   ✅ Level 2: Intermediate Verification — withdraw ₹1Cr/day, trade ₹5Cr/day
+   ✅ Level 3: Advanced Verification — withdraw ₹5Cr/day, trade ₹10Cr/day
+
+✅ KYC settings seed complete.
+
+────────────────────────────────────────────────────────────
+🌱 Running: Step 4/7 — AI Trading Plans
+────────────────────────────────────────────────────────────
+🤖 AI Trading Plans seed — starting…
+   ↻  Updated : Starter (low) — 0.50%/day
+   ↻  Updated : Growth (medium) — 0.85%/day
+   ↻  Updated : Pro (high) — 1.20%/day
+   ↻  Updated : Elite (ultra) — 1.80%/day
+
+✅ AI Plans seed complete — created: 0  updated: 4
+   Note: engine caps effective daily yield at 1.3% regardless of plan rate.
+
+────────────────────────────────────────────────────────────
+🌱 Running: Step 5/7 — Earn & Staking Products
+────────────────────────────────────────────────────────────
+💰 Earn Plans seed — starting…
+   ↻  Updated : USDT — USDT Flexible Savings (5.00% APY)
+   ↻  Updated : USDT — USDT 30-Day Fixed (8.00% APY)
+   ↻  Updated : USDT — USDT 90-Day Fixed (12.00% APY)
+   ↻  Updated : BTC — BTC Flexible Savings (2.50% APY)
+   ↻  Updated : BTC — BTC 60-Day Fixed (4.50% APY)
+   ↻  Updated : ETH — ETH Flexible Savings (3.80% APY)
+   ↻  Updated : ETH — ETH 90-Day Staking (6.50% APY)
+   ↻  Updated : BNB — BNB Flexible Savings (4.20% APY)
+   ↻  Updated : SOL — SOL Staking (7.00% APY)
+   ✅ Created : ZBX — ZBX Flexible Staking (18.00% APY)
+   ✅ Created : ZBX — ZBX 90-Day Power Staking (28.00% APY)
+   ↻  Updated : USDC — USDC Flexible Savings (5.00% APY)
+
+✅ Earn seed complete — created: 2  updated: 10  skipped: 0
+
+────────────────────────────────────────────────────────────
+🌱 Running: Step 6/7 — Market Bots
+────────────────────────────────────────────────────────────
+🤖 Zebvix Advanced Bot Seed — starting…
+   Found 146 active pairs
+   T2 [ 15] UNI/USDT — spread=100bps levels=10 size=9 spot=✓ futures=✓ mktTaker=✓
+   T2 [  9] TRX/USDT — spread=100bps levels=10 size=500 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 90] FET/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T1 [127] BTC/INR — spread=14bps levels=12 size=0.004 spot=✓ futures=✓ mktTaker=✓
+   T2 [103] DOGE/BTC — spread=106bps levels=10 size=2000 spot=✓ futures=✓ mktTaker=✓
+   T2 [  6] ADA/USDT — spread=100bps levels=10 size=280 spot=✓ futures=✓ mktTaker=✓
+   T2 [136] LINK/INR — spread=104bps levels=10 size=8 spot=✓ futures=✓ mktTaker=✓
+   T2 [109] BCH/BTC — spread=106bps levels=10 size=50 spot=✓ futures=✓ mktTaker=✓
+   T2 [105] DOT/BTC — spread=106bps levels=10 size=12 spot=✓ futures=✓ mktTaker=✓
+   T2 [126] TIA/BTC — spread=106bps levels=10 size=50 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 42] WIF/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [130] SOL/INR — spread=104bps levels=10 size=1.20 spot=✓ futures=✓ mktTaker=✓
+   T1 [  2] ETH/USDT — spread=10bps levels=12 size=0.06 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 38] SUI/USDT — spread=100bps levels=10 size=65 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 10] DOT/USDT — spread=100bps levels=10 size=14 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 37] INJ/USDT — spread=100bps levels=10 size=4 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 49] ENS/USDT — spread=100bps levels=8 size=2 spot=✓ futures=✗ mktTaker=✓
+   T2 [132] ADA/INR — spread=104bps levels=10 size=280 spot=✓ futures=✓ mktTaker=✓
+   T2 [124] SUI/BTC — spread=106bps levels=10 size=50 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 34] CRV/USDT — spread=100bps levels=8 size=45 spot=✓ futures=✗ mktTaker=✓
+   T3 [118] ICP/BTC — spread=106bps levels=8 size=50 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 39] SEI/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 72] BAND/USDT — spread=100bps levels=8 size=15 spot=✓ futures=✗ mktTaker=✓
+   T3 [115] VET/BTC — spread=106bps levels=8 size=50 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 98] BNB/BTC — spread=106bps levels=10 size=50 spot=✓ futures=✓ mktTaker=✓
+   T1 [  1] BTC/USDT — spread=10bps levels=12 size=0.004 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 32] GRT/USDT — spread=100bps levels=8 size=200 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 21] VET/USDT — spread=100bps levels=8 size=1000 spot=✓ futures=✗ mktTaker=✓
+   T2 [  4] SOL/USDT — spread=100bps levels=10 size=1.20 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 70] AUDIO/USDT — spread=100bps levels=8 size=80 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 46] SAND/USDT — spread=100bps levels=8 size=80 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 51] GALA/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 27] APT/USDT — spread=100bps levels=10 size=14 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 71] SKL/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [102] AVAX/BTC — spread=106bps levels=10 size=2 spot=✓ futures=✓ mktTaker=✓
+   T2 [131] XRP/INR — spread=104bps levels=10 size=180 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 40] TIA/USDT — spread=100bps levels=10 size=15 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 87] HOT/USDT — spread=100bps levels=8 size=10000 spot=✓ futures=✗ mktTaker=✓
+   T2 [121] ARB/BTC — spread=106bps levels=10 size=100 spot=✓ futures=✓ mktTaker=✓
+   T2 [144] INJ/INR — spread=104bps levels=10 size=4 spot=✓ futures=✓ mktTaker=✓
+   T2 [112] ATOM/BTC — spread=106bps levels=10 size=6 spot=✓ futures=✓ mktTaker=✓
+   T2 [110] UNI/BTC — spread=106bps levels=10 size=10 spot=✓ futures=✓ mktTaker=✓
+   T2 [108] LTC/BTC — spread=106bps levels=10 size=1 spot=✓ futures=✓ mktTaker=✓
+   T2 [120] APT/BTC — spread=106bps levels=10 size=3 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 43] PEPE/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [137] LTC/INR — spread=104bps levels=10 size=0.70 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 24] ICP/USDT — spread=100bps levels=8 size=1.5 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 88] WIN/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [141] ATOM/INR — spread=104bps levels=10 size=10 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 67] SUSHI/USDT — spread=100bps levels=8 size=25 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 89] LSK/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 16] XLM/USDT — spread=100bps levels=8 size=350 spot=✓ futures=✗ mktTaker=✓
+   T2 [100] XRP/BTC — spread=106bps levels=10 size=300 spot=✓ futures=✓ mktTaker=✓
+   T2 [142] NEAR/INR — spread=104bps levels=10 size=30 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 82] DYDX/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 25] HBAR/USDT — spread=100bps levels=8 size=400 spot=✓ futures=✗ mktTaker=✓
+   T2 [134] DOGE/INR — spread=104bps levels=10 size=700 spot=✓ futures=✓ mktTaker=✓
+   T2 [114] ALGO/BTC — spread=106bps levels=10 size=400 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 65] YFI/USDT — spread=100bps levels=8 size=0.002 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 13] LTC/USDT — spread=100bps levels=10 size=0.70 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 48] CHZ/USDT — spread=100bps levels=8 size=250 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 26] QNT/USDT — spread=100bps levels=8 size=0.2 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 36] RUNE/USDT — spread=100bps levels=8 size=10 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 29] OP/USDT — spread=100bps levels=10 size=80 spot=✓ futures=✓ mktTaker=✓
+   T2 [106] MATIC/BTC — spread=106bps levels=10 size=300 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 99] SOL/BTC — spread=106bps levels=10 size=2 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 80] STORJ/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 23] NEAR/USDT — spread=100bps levels=10 size=30 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 94] LOOM/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 83] PERP/USDT — spread=100bps levels=8 size=15 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 73] OCEAN/USDT — spread=100bps levels=8 size=80 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 92] RNDR/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 18] XMR/USDT — spread=100bps levels=8 size=0.5 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 57] EOS/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 30] MKR/USDT — spread=100bps levels=8 size=0.02 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 77] BAL/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [135] MATIC/INR — spread=104bps levels=10 size=180 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 86] DENT/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [122] OP/BTC — spread=106bps levels=10 size=50 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 54] ONE/USDT — spread=100bps levels=8 size=500 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 45] FIL/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [139] UNI/INR — spread=104bps levels=10 size=9 spot=✓ futures=✓ mktTaker=✓
+   T3 [111] XLM/BTC — spread=106bps levels=8 size=600 spot=✓ futures=✗ mktTaker=✓
+   T2 [107] LINK/BTC — spread=106bps levels=10 size=10 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 63] BAT/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T1 [128] ETH/INR — spread=14bps levels=12 size=0.06 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 52] ROSE/USDT — spread=100bps levels=8 size=200 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 56] IOTA/USDT — spread=100bps levels=8 size=80 spot=✓ futures=✗ mktTaker=✓
+   T3 [113] ETC/BTC — spread=106bps levels=8 size=50 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 12] LINK/USDT — spread=100bps levels=10 size=8 spot=✓ futures=✓ mktTaker=✓
+   T2 [  8] DOGE/USDT — spread=100bps levels=10 size=700 spot=✓ futures=✓ mktTaker=✓
+   T3 [146] ICP/INR — spread=104bps levels=8 size=1.5 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 58] XTZ/USDT — spread=100bps levels=8 size=30 spot=✓ futures=✗ mktTaker=✓
+   T2 [  3] BNB/USDT — spread=100bps levels=10 size=0.30 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 61] ZEC/USDT — spread=100bps levels=8 size=0.5 spot=✓ futures=✗ mktTaker=✓
+   T3 [119] HBAR/BTC — spread=106bps levels=8 size=50 spot=✓ futures=✗ mktTaker=✓
+   T2 [143] ARB/INR — spread=104bps levels=10 size=150 spot=✓ futures=✓ mktTaker=✓
+   T1 [ 97] ETH/BTC — spread=16bps levels=12 size=50 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 74] CELR/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [138] DOT/INR — spread=104bps levels=10 size=14 spot=✓ futures=✓ mktTaker=✓
+   T2 [140] BCH/INR — spread=104bps levels=10 size=0.18 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 47] MANA/USDT — spread=100bps levels=8 size=60 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 60] ICX/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 28] ARB/USDT — spread=100bps levels=10 size=150 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 20] ALGO/USDT — spread=100bps levels=10 size=220 spot=✓ futures=✓ mktTaker=✓
+   T2 [117] NEAR/BTC — spread=106bps levels=10 size=40 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 95] MTL/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 35] LDO/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 17] ATOM/USDT — spread=100bps levels=10 size=10 spot=✓ futures=✓ mktTaker=✓
+   T2 [116] FTM/BTC — spread=106bps levels=10 size=500 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 53] KAVA/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 31] AAVE/USDT — spread=100bps levels=10 size=0.40 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 11] MATIC/USDT — spread=100bps levels=10 size=180 spot=✓ futures=✓ mktTaker=✓
+   T2 [ 22] FTM/USDT — spread=100bps levels=10 size=200 spot=✓ futures=✓ mktTaker=✓
+   T2 [123] INJ/BTC — spread=106bps levels=10 size=50 spot=✓ futures=✓ mktTaker=✓
+   T2 [129] BNB/INR — spread=104bps levels=10 size=0.30 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 78] UMA/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 69] ANKR/USDT — spread=100bps levels=8 size=500 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 50] APE/USDT — spread=100bps levels=8 size=30 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 44] BONK/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [101] ADA/BTC — spread=106bps levels=10 size=500 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 66] 1INCH/USDT — spread=100bps levels=8 size=80 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 84] CTSI/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [125] SEI/BTC — spread=106bps levels=8 size=50 spot=✓ futures=✗ mktTaker=✓
+   T2 [104] TRX/BTC — spread=106bps levels=10 size=50 spot=✓ futures=✓ mktTaker=✓
+   T2 [145] TRX/INR — spread=104bps levels=10 size=500 spot=✓ futures=✓ mktTaker=✓
+   T2 [  7] AVAX/USDT — spread=100bps levels=10 size=1.80 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 93] PHA/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 81] FLUX/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 96] SXP/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 75] REN/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 41] JUP/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 59] WAVES/USDT — spread=100bps levels=8 size=5 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 64] COMP/USDT — spread=100bps levels=8 size=0.25 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 91] AGIX/USDT — spread=100bps levels=8 size=100 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 85] COTI/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 55] ZIL/USDT — spread=100bps levels=8 size=1000 spot=✓ futures=✗ mktTaker=✓
+   T2 [133] AVAX/INR — spread=104bps levels=10 size=1.80 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 62] DASH/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 79] NMR/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 76] KNC/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 19] ETC/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T3 [ 68] ZEN/USDT — spread=100bps levels=8 size=8 spot=✓ futures=✗ mktTaker=✓
+   T2 [  5] XRP/USDT — spread=100bps levels=10 size=180 spot=✓ futures=✓ mktTaker=✓
+   T3 [ 33] SNX/USDT — spread=100bps levels=8 size=12 spot=✓ futures=✗ mktTaker=✓
+   T2 [ 14] BCH/USDT — spread=100bps levels=10 size=0.18 spot=✓ futures=✓ mktTaker=✓
+
+✅ Done — created: 0  updated: 146  skipped: 0
+   Total bots active: 146
+
+Tier summary:
+  T1 (BTC/ETH)      — spread 8–12bps, 12 levels, spot+futures, aggressive mktTaker 3.5×
+  T2 (major alts)   — spread 14–18bps, 10 levels, spot+futures, mktTaker 2.5×
+  T3 (mid-caps)     — spread 22–28bps,  8 levels, spot only,    mktTaker 1.8×
+
+Bot engine features active:
+  ✓ Exponential volume taper  — thick near mid, thin at edges
+  ✓ Momentum-aware sizing     — bigger orders when price trends up
+  ✓ Dynamic level count       — extra levels added on momentum side
+  ✓ Scaled market taker       — burst size ∝ momentum strength
+  ✓ Momentum burst mode       — oversized order on >100 bps move
+  ✓ Futures enabled           — T1+T2 pairs serve orderbook depth on perps
+
+────────────────────────────────────────────────────────────
+🌱 Running: Step 7/7 — AI Demo Accounts (leaderboard data)
+────────────────────────────────────────────────────────────
+🤖 AI Accounts Seed — starting (10 accounts)…
+
+❌ AI accounts seed failed: Failed query: insert into "ai_trading_subscriptions" ("id", "uid", "user_id", "plan_id", "invested_amount", "funding_coin_id", "funding_amount", "started_at", "expires_at", "status", "total_earned", "last_credited_at", "created_at") values (default, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, default) returning "id"
+params: 01KVE0WP60306SK7CDSH1Z71E9,16,1,500.00000000,2,500.00000000,2026-05-21T18:46:28.287Z,2026-06-20T18:46:28.287Z,active,70.00000000,2026-06-18T18:46:28.287Z
+
+❌ Step 7/7 — AI Demo Accounts (leaderboard data) FAILED — aborting seed:all
+/opt/cryptox/scripts:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/scripts@0.0.0 seed:all: `tsx ./src/seed-all.ts`
+Exit status 1
+
+> workspace@0.0.0 build /opt/cryptox
+> pnpm run typecheck && pnpm -r --if-present run build
+
+
+> workspace@0.0.0 typecheck /opt/cryptox
+> pnpm run typecheck:libs && pnpm -r --filter "./artifacts/**" --filter "./scripts" --if-present run typecheck
+
+
+> workspace@0.0.0 typecheck:libs /opt/cryptox
+> tsc --build
+
+Scope: 6 of 12 workspace projects
+artifacts/api-server typecheck$ tsc -p tsconfig.json --noEmit
+└─ Running...
+artifacts/mockup-sandbox typecheck$ tsc -p tsconfig.json --noEmit
+└─ Done in 18.4s
+artifacts/user-portal typecheck$ tsc -p tsconfig.json --noEmit
+└─ Running...
+artifacts/admin typecheck$ tsc -p tsconfig.json --noEmit
+└─ Running...
+artifacts/zebvix-demo typecheck$ tsc -p tsconfig.json --noEmit
+│ src/components/video/VideoTemplate.tsx(73,11): error TS2812: Property 'volume' does not exist on type 'HTMLAudioEle…
+│ src/components/video/VideoTemplate.tsx(75,24): error TS2812: Property 'currentTime' does not exist on type 'HTMLAud…
+│ src/components/video/VideoTemplate.tsx(76,13): error TS2812: Property 'currentTime' does not exist on type 'HTMLAud…
+│ src/components/video/VideoTemplate.tsx(78,11): error TS2812: Property 'play' does not exist on type 'HTMLAudioEleme…
+│ src/components/video/VideoWithControls.tsx(41,16): error TS2304: Cannot find name 'window'.
+│ src/components/video/VideoWithControls.tsx(44,18): error TS2304: Cannot find name 'window'.
+│ src/components/video/VideoWithControls.tsx(152,28): error TS2304: Cannot find name 'window'.
+│ src/components/video/VideoWithControls.tsx(152,54): error TS2304: Cannot find name 'window'.
+│ src/components/video/VideoWithControls.tsx(152,70): error TS2304: Cannot find name 'window'.
+│ src/components/video/VideoWithControls.tsx(199,13): error TS2339: Property 'pointerType' does not exist on type 'Po…
+│ src/components/video/VideoWithControls.tsx(201,29): error TS2812: Property 'contains' does not exist on type 'HTMLD…
+│ src/components/video/VideoWithControls.tsx(201,50): error TS2304: Cannot find name 'Node'.
+│ src/components/video/VideoWithControls.tsx(203,5): error TS2584: Cannot find name 'document'. Do you need to change…
+│ src/components/video/VideoWithControls.tsx(204,18): error TS2584: Cannot find name 'document'. Do you need to chang…
+│ src/hooks/use-mobile.tsx(9,17): error TS2304: Cannot find name 'window'.
+│ src/hooks/use-mobile.tsx(11,19): error TS2304: Cannot find name 'window'.
+│ src/hooks/use-mobile.tsx(14,17): error TS2304: Cannot find name 'window'.
+│ src/lib/video/animations.ts(184,3): error TS2322: Type '{ opacity: number; y: number; rotateX: number; transformPer…
+│   Type '{ opacity: number; y: number; rotateX: number; transformPerspective: number; transition: { type: "spring"; …
+│     Type '{ opacity: number; y: number; rotateX: number; transformPerspective: number; transition: { type: "spring"…
+│       Type '{ opacity: number; y: number; rotateX: number; transformPerspective: number; transition: { type: "sprin…
+│         Property 'transition' is incompatible with index signature.
+│           Type '{ type: "spring"; stiffness: number; damping: number; }' is not assignable to type 'ValueKeyframesD…
+│             Type '{ type: "spring"; stiffness: number; damping: number; }' is not assignable to type 'undefined'.
+│ src/lib/video/animations.ts(195,3): error TS2322: Type '{ transition: { staggerChildren: number; delayChildren: num…
+│   Type '{ transition: { staggerChildren: number; delayChildren: number; }; }' is not assignable to type 'TargetAndT…
+│     Type '{ transition: { staggerChildren: number; delayChildren: number; }; }' is not assignable to type 'Target'.
+│       Type '{ transition: { staggerChildren: number; delayChildren: number; }; }' is not assignable to type 'StyleK…
+│         Property 'transition' is incompatible with index signature.
+│           Type '{ staggerChildren: number; delayChildren: number; }' is not assignable to type 'ValueKeyframesDefin…
+│             Type '{ staggerChildren: number; delayChildren: number; }' is not assignable to type 'undefined'.
+│ src/lib/video/animations.ts(213,3): error TS2322: Type '{ opacity: number; transition: { readonly staggerChildren: …
+│   Type '{ opacity: number; transition: { readonly staggerChildren: 0.1; readonly delayChildren: 0.1; }; }' is not a…
+│     Type '{ opacity: number; transition: { readonly staggerChildren: 0.1; readonly delayChildren: 0.1; }; }' is not…
+│       Type '{ opacity: number; transition: { readonly staggerChildren: 0.1; readonly delayChildren: 0.1; }; }' is n…
+│         Property 'transition' is incompatible with index signature.
+│           Type '{ readonly staggerChildren: 0.1; readonly delayChildren: 0.1; }' is not assignable to type 'ValueKe…
+│ src/lib/video/animations.ts(221,3): error TS2322: Type '{ opacity: number; y: number; transition: { duration: numbe…
+│   Type '{ opacity: number; y: number; transition: { duration: number; ease: "circOut"; }; }' is not assignable to t…
+│     Type '{ opacity: number; y: number; transition: { duration: number; ease: "circOut"; }; }' is not assignable to…
+│       Type '{ opacity: number; y: number; transition: { duration: number; ease: "circOut"; }; }' is not assignable …
+│         Property 'transition' is incompatible with index signature.
+│           Type '{ duration: number; ease: "circOut"; }' is not assignable to type 'ValueKeyframesDefinition | undef…
+│             Type '{ duration: number; ease: "circOut"; }' is not assignable to type 'undefined'.
+│ src/lib/video/hooks.ts(42,5): error TS2304: Cannot find name 'window'.
+│ src/lib/video/hooks.ts(55,11): error TS2304: Cannot find name 'window'.
+│ src/main.tsx(5,12): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try chang…
+└─ Failed in 5.6s at /opt/cryptox/artifacts/zebvix-demo
+/opt/cryptox/artifacts/zebvix-demo:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/zebvix-demo@0.0.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2
+scripts typecheck$ tsc -p tsconfig.json --noEmit
+└─ Running...
+ ELIFECYCLE  Command failed with exit code 2.
+ ELIFECYCLE  Command failed with exit code 2.
+[PM2] Starting /usr/bin/bash in fork_mode (1 instance)
+[PM2] Done.
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 2  │ api-server         │ fork     │ 0    │ online    │ 0%       │ 3.4mb    │
+│ 0  │ cryptox-api        │ fork     │ 494  │  │ 0%       │ 0b       │
+│ 1  │ cryptox-go         │ fork     │ 37   │ online    │ 0%       │ 7.6mb    │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Starting /usr/bin/bash in fork_mode (1 instance)
+[PM2] Done.
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ admin              │ fork     │ 0    │ online    │ 0%       │ 584.0kb  │
+│ 2  │ api-server         │ fork     │ 0    │ online    │ 100%     │ 66.5mb   │
+│ 0  │ cryptox-api        │ fork     │ 494  │  │ 0%       │ 0b       │
+│ 1  │ cryptox-go         │ fork     │ 37   │ online    │ 0%       │ 7.6mb    │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Starting /usr/bin/bash in fork_mode (1 instance)
+[PM2] Done.
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ admin              │ fork     │ 0    │ online    │ 100%     │ 81.0mb   │
+│ 2  │ api-server         │ fork     │ 0    │ online    │ 50%      │ 96.6mb   │
+│ 0  │ cryptox-api        │ fork     │ 494  │  │ 0%       │ 0b       │
+│ 1  │ cryptox-go         │ fork     │ 37   │ online    │ 0%       │ 7.6mb    │
+│ 4  │ user-portal        │ fork     │ 0    │ online    │ 0%       │ 2.8mb    │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Saving current process list...
+[PM2] Successfully saved in /home/ubuntu/.pm2/dump.pm2
+[PM2] Init System found: systemd
+[PM2] To setup the Startup Script, copy/paste the following command:
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+ubuntu@ip-172-31-11-99:/opt/cryptox$
+
