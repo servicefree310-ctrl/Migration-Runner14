@@ -189,6 +189,9 @@ run_sql_file "013 — broker accounts system" \
 run_sql_file "014 — coins/networks/pairs performance indexes" \
   "$ROOT_DIR/lib/db/migrations/014_coins_networks_pairs.sql"
 
+run_sql_file "015 — auto-invest accounts + trades tables" \
+  "$ROOT_DIR/lib/db/migrations/015_auto_invest.sql"
+
 echo ""
 echo -e "${GREEN}============================================================"
 echo " ✅ All migrations complete!"
