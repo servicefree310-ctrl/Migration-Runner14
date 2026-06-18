@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# Block API, admin, and private paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /user/login
+Disallow: /user/signup
+Disallow: /user/wallet
+Disallow: /user/orders
+Disallow: /user/settings
+Disallow: /user/kyc
+Disallow: /user/profile
+Disallow: /user/banks
+Disallow: /user/notifications
+
+# Block bots from heavy trading pages (server load)
+Disallow: /user/trade/
+Disallow: /user/futures/
+
+# Sitemaps
+Sitemap: https://exchange.zebvix.io/sitemap.xml
+Sitemap: https://exchange.zebvix.io/user/sitemap.xml
+
+# Crawl delay for polite crawlers
+Crawl-delay: 10

@@ -1,0 +1,31 @@
+kind = "video"
+previewPath = "/zebvix-demo/"
+title = "Zebvix Demo Video"
+version = "1.0.0"
+id = "artifacts/zebvix-demo"
+router = "path"
+
+[[integratedSkills]]
+name = "video-js"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/zebvix-demo/" ]
+localPort = 21778
+
+[services.development]
+run = "pnpm --filter @workspace/zebvix-demo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/zebvix-demo", "run", "build" ]
+publicDir = "artifacts/zebvix-demo/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21778"
+BASE_PATH = "/zebvix-demo/"

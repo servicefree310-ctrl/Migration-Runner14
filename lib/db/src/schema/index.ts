@@ -1,20 +1,41 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
-
-export {}
+export * from "./users";
+export * from "./sessions";
+export * from "./kyc";
+export * from "./banks";
+export * from "./coins";
+export * from "./gateways";
+export * from "./wallets";
+export * from "./transactions";
+export * from "./otp";
+export * from "./orders";
+export * from "./earn";
+export * from "./cms";
+export * from "./deposit-addresses";
+export * from "./wallet-addresses";
+export * from "./funding-rates";
+export * from "./market-bots";
+export * from "./futures";
+export * from "./user-api-keys";
+export * from "./options";
+export * from "./web3";
+export * from "./listings";
+export * from "./notifications";
+export * from "./bots";
+export * from "./copy-trading";
+export * from "./dashboard";
+export * from "./p2p";
+export * from "./convert";
+export * from "./instruments";
+export * from "./broker-accounts";
+export * from "./ai-trading";
+export * from "./inr-transactions";
+export * from "./master-wallets";
+export * from "./support-tickets";
+export * from "./exchange-settings";
+export * from "./fee-config";
+export * from "./activity-events";
+export * from "./wallet-ledger";
+export * from "./conversations";
+export * from "./messages";
+export * from "./creator-rewards";
+export * from "./auto-invest";

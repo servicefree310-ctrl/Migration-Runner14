@@ -1,0 +1,25 @@
+uploads = []
+
+[[generated]]
+id = "eQcSzmOSHC2lwDEZCtlFL"
+uri = "file://artifacts/zebvix-demo/public/images/bg-trading.png"
+type = "image"
+title = "Dark trading floor bg"
+
+[[generated]]
+id = "8y4l7l4F9w2TfNE9Tuw-Q"
+uri = "file://artifacts/zebvix-demo/public/images/ui-wallet.png"
+type = "image"
+title = "Crypto wallet UI mockup"
+
+[[generated]]
+id = "Z3yh-8u3XFK2DP6pk0pGR"
+uri = "file://artifacts/zebvix-demo/public/images/network-nodes.png"
+type = "image"
+title = "Abstract network nodes"
+
+[[outputs]]
+id = "BNo3Z_HSOw2hpzmlrHw8R"
+uri = "file://artifacts/zebvix-demo/public/audio/bg_music.mp3"
+type = "audio"
+title = "Zebvix crypto exchange background music"

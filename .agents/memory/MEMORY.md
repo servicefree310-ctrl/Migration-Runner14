@@ -1,0 +1,8 @@
+- [Spot+Futures audit findings](spot-futures-audit.md) — 10 bugs found and fixed across matching engine, orders API, Trade.tsx, Futures.tsx.
+- [ProDashboard audit findings](prodashboard-audit.md) — 4 bugs fixed in dashboard (navigation, INR pairs excluded, broken trade links, alert label).
+- [Portfolio PRO audit findings](portfolio-pro-audit.md) — 7 bugs fixed across PortfolioPro.tsx + portfolio-analytics.ts.
+- [Trading Bots audit findings](bots-audit.md) — 8 bugs fixed across Bots.tsx, bots.ts, bot-engine.ts.
+- [Wallet Ledger audit findings](ledger-audit.md) — 8 bugs fixed across Ledger.tsx and ledger.ts.
+- [Wallet + cross-page audit findings](wallet-crosspage-audit.md) — 17 bugs fixed across Wallet.tsx, INRPayments, Profile, Referrals, PriceAlerts, Support, SupportTickets, P2P, SupportChatWidget, KoinXTab.
+- [Bot engine wallet fix](bot-engine-wallet.md) — bot trades now debit/credit real user wallets; balance pre-flight on START.
+- [API v1 HMAC system](api-v1-hmac.md) — CSRF bypass needed in app.ts for X-ZBX-APIKEY+X-ZBX-SIGN headers on write endpoints.

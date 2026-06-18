@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/user/"
+title = "CryptoX Exchange"
+version = "1.0.0"
+id = "artifacts/user-portal"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/user/" ]
+localPort = 23475
+
+[services.development]
+run = "pnpm --filter @workspace/user-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/user-portal", "run", "build" ]
+publicDir = "artifacts/user-portal/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23475"
+BASE_PATH = "/user/"

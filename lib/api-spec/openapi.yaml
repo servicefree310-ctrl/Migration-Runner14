@@ -10,6 +10,26 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication — login, register, session, 2FA
+  - name: spot-trading
+    description: Spot market orders and fills
+  - name: futures
+    description: Futures trading — orders, positions, leverage
+  - name: alerts
+    description: User price alerts
+  - name: wallet
+    description: Wallet operations — deposit addresses, balances, networks
+  - name: earn
+    description: Earn / staking products and positions
+  - name: admin-coins
+    description: Admin coin management
+  - name: admin-pairs
+    description: Admin trading pair management
+  - name: p2p
+    description: P2P trading — offers, orders, payment methods, chat, disputes
+  - name: p2p-admin
+    description: Admin moderation endpoints for the P2P marketplace
 paths:
   /healthz:
     get:
@@ -24,13 +44,1660 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── P2P: payment methods ────────────────────────────────────────────
+  /p2p/payment-methods:
+    get:
+      operationId: listP2pPaymentMethods
+      tags: [p2p]
+      summary: List the authenticated user's saved P2P payment methods
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pPaymentMethod" }
+    post:
+      operationId: createP2pPaymentMethod
+      tags: [p2p]
+      summary: Add a payment method (UPI / IMPS / bank / wallet)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pPaymentMethodInput" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pPaymentMethod" }
+
+  /p2p/payment-methods/{id}:
+    delete:
+      operationId: deleteP2pPaymentMethod
+      tags: [p2p]
+      summary: Soft-delete (deactivate) a payment method
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Deactivated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  # ─── P2P: offers (ads) ───────────────────────────────────────────────
+  /p2p/offers:
+    get:
+      operationId: listP2pOffers
+      tags: [p2p]
+      summary: Browse the public offer book
+      parameters:
+        - in: query
+          name: side
+          required: false
+          schema: { type: string, enum: [buy, sell], default: sell }
+          description: "buy = merchant wants to buy crypto from you; sell = merchant sells crypto to you"
+        - in: query
+          name: coin
+          required: false
+          schema: { type: string }
+          description: Coin SYMBOL (e.g. BTC, USDT) — case insensitive, server uppercases
+        - in: query
+          name: fiat
+          required: false
+          schema: { type: string, default: INR }
+        - in: query
+          name: method
+          required: false
+          schema: { type: string, enum: [upi, imps, neft, bank, paytm, phonepe, gpay] }
+          description: Filter to offers accepting this payment method type
+        - in: query
+          name: limit
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pOffer" }
+    post:
+      operationId: createP2pOffer
+      tags: [p2p]
+      summary: Post a new merchant offer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pOfferInput" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOffer" }
+
+  /p2p/offers/mine:
+    get:
+      operationId: listMyP2pOffers
+      tags: [p2p]
+      summary: List offers owned by the authenticated user (any status)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pOffer" }
+
+  /p2p/offers/{id}:
+    get:
+      operationId: getP2pOffer
+      tags: [p2p]
+      summary: Fetch a single offer (auth required, hides PII)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOffer" }
+    patch:
+      operationId: updateP2pOffer
+      tags: [p2p]
+      summary: Update one of your own offers (price, status, limits, terms)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pOfferPatch" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOffer" }
+    delete:
+      operationId: deleteP2pOffer
+      tags: [p2p]
+      summary: Soft-delete a merchant's own offer (status → closed)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Closed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /p2p/offers/{id}/seller-methods:
+    get:
+      operationId: listP2pOfferSellerMethods
+      tags: [p2p]
+      summary: For SELL offers, list the merchant's payment method ids/types/labels (no PII)
+      description: |
+        Returns method id + type + label only (no account number) so the buyer
+        can pick which of the merchant's saved methods to use when opening
+        the order. Always returns an empty array for BUY offers.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pSellerMethod" }
+
+  # ─── P2P: orders ─────────────────────────────────────────────────────
+  /p2p/orders:
+    get:
+      operationId: listP2pOrders
+      tags: [p2p]
+      summary: List all orders the authenticated user is party to (buyer or seller)
+      parameters:
+        - in: query
+          name: role
+          required: false
+          schema: { type: string, enum: [buyer, seller, all], default: all }
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [all, pending, paid, released, cancelled, disputed, expired], default: all }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pOrder" }
+    post:
+      operationId: openP2pOrder
+      tags: [p2p]
+      summary: Open a new order against an existing offer (locks seller's escrow)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pOrderInput" }
+      responses:
+        "200":
+          description: Opened
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOrder" }
+
+  /p2p/orders/{id}:
+    get:
+      operationId: getP2pOrder
+      tags: [p2p]
+      summary: Get a single order (must be a party or admin)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOrder" }
+
+  /p2p/orders/{id}/mark-paid:
+    post:
+      operationId: markP2pOrderPaid
+      tags: [p2p]
+      summary: Buyer marks the fiat as transferred (optional UTR / reference)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pMarkPaidInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOrder" }
+
+  /p2p/orders/{id}/release:
+    post:
+      operationId: releaseP2pOrder
+      tags: [p2p]
+      summary: Seller releases escrow → crypto credited to buyer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Released
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOrder" }
+
+  /p2p/orders/{id}/cancel:
+    post:
+      operationId: cancelP2pOrder
+      tags: [p2p]
+      summary: Cancel a pending order (refunds seller's escrow)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOrder" }
+
+  /p2p/orders/{id}/dispute:
+    post:
+      operationId: openP2pDispute
+      tags: [p2p]
+      summary: Open a dispute on a pending or paid order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pDisputeInput" }
+      responses:
+        "200":
+          description: Disputed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOrder" }
+
+  /p2p/orders/{id}/messages:
+    get:
+      operationId: listP2pMessages
+      tags: [p2p]
+      summary: List chat messages on an order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pMessage" }
+    post:
+      operationId: postP2pMessage
+      tags: [p2p]
+      summary: Post a chat message to an order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pMessageInput" }
+      responses:
+        "200":
+          description: Posted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pMessage" }
+
+  # ─── P2P admin / moderation ──────────────────────────────────────────
+  /admin/p2p/stats:
+    get:
+      operationId: getP2pAdminStats
+      tags: [p2p-admin]
+      summary: Marketplace counters for the admin dashboard
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pAdminStats" }
+
+  /admin/p2p/offers:
+    get:
+      operationId: listP2pAdminOffers
+      tags: [p2p-admin]
+      summary: List all offers (any merchant) for moderation
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [all, online, offline, suspended, closed], default: all }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pOffer" }
+
+  /admin/p2p/offers/{id}:
+    patch:
+      operationId: updateP2pAdminOffer
+      tags: [p2p-admin]
+      summary: Admin status change (suspend / restore / take offline / close)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pAdminOfferPatch" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOffer" }
+
+  /admin/p2p/orders:
+    get:
+      operationId: listP2pAdminOrders
+      tags: [p2p-admin]
+      summary: List all orders across the marketplace for moderation
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [all, pending, paid, released, cancelled, disputed, expired], default: all }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pOrder" }
+
+  /admin/p2p/disputes:
+    get:
+      operationId: listP2pAdminDisputes
+      tags: [p2p-admin]
+      summary: All currently-disputed orders, oldest first
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/P2pAdminDispute" }
+
+  /admin/p2p/disputes/{id}/resolve:
+    post:
+      operationId: resolveP2pDispute
+      tags: [p2p-admin]
+      summary: Resolve a dispute by releasing to buyer or refunding to seller
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/P2pResolveDisputeInput" }
+      responses:
+        "200":
+          description: Resolved — returns the updated order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/P2pOrder" }
+
+  # ─── Auth ────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterInput" }
+      responses:
+        "201":
+          description: Created — returns the new user and sets cx_session cookie
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "409": { description: Email already registered }
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginInput" }
+      responses:
+        "200":
+          description: OK — sets cx_session cookie; includes 2FA challenge flag
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401": { description: Invalid credentials }
+        "403": { description: Account suspended }
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get the currently authenticated user
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { description: Unauthenticated }
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Invalidate the current session
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200": { description: OK }
+
+  /auth/change-password:
+    post:
+      operationId: changePassword
+      tags: [auth]
+      summary: Change the authenticated user's password
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChangePasswordInput" }
+      responses:
+        "200": { description: Password changed }
+        "400": { description: Current password incorrect }
+
+  # ─── Spot trading ─────────────────────────────────────────────────────────
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [spot-trading]
+      summary: List the authenticated user's orders
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: pairId
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, filled, cancelled, partial, partial_cancelled, pending_trigger] }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, maximum: 200 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Order" }
+    post:
+      operationId: placeOrder
+      tags: [spot-trading]
+      summary: Place a new spot order
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlaceOrderInput" }
+      responses:
+        "201":
+          description: Order placed (may be immediately filled)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "400": { description: Validation error }
+        "403": { description: KYC Level 1 required }
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [spot-trading]
+      summary: Get a single spot order by ID
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "404": { description: Not found }
+
+  /orders/{id}/cancel:
+    post:
+      operationId: cancelOrder
+      tags: [spot-trading]
+      summary: Cancel an open or partial spot order
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Cancelled — returns updated order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "400": { description: Order not cancellable }
+        "404": { description: Not found }
+
+  /orders/{id}/fills:
+    get:
+      operationId: listOrderFills
+      tags: [spot-trading]
+      summary: Get fill (trade) records for a specific order
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Fill" }
+
+  # ─── Futures ──────────────────────────────────────────────────────────────
+  /futures/order:
+    get:
+      operationId: listFuturesOrders
+      tags: [futures]
+      summary: List the authenticated user's futures orders
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - name: currency
+          in: query
+          schema: { type: string }
+          description: Quote currency symbol (e.g. USDT)
+        - name: pair
+          in: query
+          schema: { type: string }
+          description: Base asset symbol (e.g. BTC)
+        - name: status
+          in: query
+          schema: { type: string, enum: [OPEN, FILLED, CANCELLED, REJECTED] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/FuturesOrder" }
+    post:
+      operationId: placeFuturesOrder
+      tags: [futures]
+      summary: Place a new futures order
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlaceFuturesOrderInput" }
+      responses:
+        "200":
+          description: Order placed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FuturesOrder" }
+        "400": { description: Validation error }
+        "403": { description: KYC Level 2 required }
+
+  /futures/order/{id}:
+    get:
+      operationId: getFuturesOrder
+      tags: [futures]
+      summary: Get a single futures order by ID or UID
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Numeric order ID or string UID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/FuturesOrder" }
+        "404": { description: Not found }
+    delete:
+      operationId: cancelFuturesOrder
+      tags: [futures]
+      summary: Cancel an open futures order
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FuturesOrder" }
+        "404": { description: Not found }
+
+  /futures/position:
+    get:
+      operationId: listFuturesPositions
+      tags: [futures]
+      summary: List open futures positions
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/FuturesPosition" }
+    delete:
+      operationId: closeAllFuturesPositions
+      tags: [futures]
+      summary: Close all open positions for a pair (market close)
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ClosePositionsInput" }
+      responses:
+        "200": { description: Positions closed }
+
+  /futures/leverage:
+    put:
+      operationId: setFuturesLeverage
+      tags: [futures]
+      summary: Set leverage for a futures pair
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetLeverageInput" }
+      responses:
+        "200": { description: Leverage updated }
+
+  # ─── Price Alerts ─────────────────────────────────────────────────────────
+  /price-alerts:
+    get:
+      operationId: listPriceAlerts
+      tags: [alerts]
+      summary: List all price alerts for the authenticated user
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PriceAlert" }
+    post:
+      operationId: createPriceAlert
+      tags: [alerts]
+      summary: Create a new price alert
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePriceAlertInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceAlert" }
+
+  /price-alerts/{id}:
+    patch:
+      operationId: updatePriceAlert
+      tags: [alerts]
+      summary: Update an existing price alert (targetPrice, condition, or note)
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdatePriceAlertInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceAlert" }
+        "404": { description: Not found }
+    delete:
+      operationId: deletePriceAlert
+      tags: [alerts]
+      summary: Delete a price alert
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: Deleted }
+
+  /price-alerts/{id}/disable:
+    patch:
+      operationId: disablePriceAlert
+      tags: [alerts]
+      summary: Disable an active price alert
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Disabled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceAlert" }
+
+  # ─── Wallet / Deposit Address ─────────────────────────────────────────────
+  /deposit-address:
+    get:
+      operationId: getDepositAddress
+      tags: [wallet]
+      summary: Get or generate a deposit address for a coin+network
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: coinId
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: networkId
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DepositAddress" }
+        "404": { description: Network not found }
+
+  /coins:
+    get:
+      operationId: listCoins
+      tags: [wallet]
+      summary: List all active listed coins
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Coin" }
+
+  /networks:
+    get:
+      operationId: listNetworks
+      tags: [wallet]
+      summary: List deposit/withdrawal networks (optionally filtered by coinId)
+      parameters:
+        - name: coinId
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Network" }
+
+  # ─── Earn ─────────────────────────────────────────────────────────────────
+  /earn/products:
+    get:
+      operationId: listEarnProducts
+      tags: [earn]
+      summary: List all active earn / staking products
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EarnProduct" }
+
+  /earn/subscribe:
+    post:
+      operationId: earnSubscribe
+      tags: [earn]
+      summary: Subscribe to an earn product (stake coins)
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EarnSubscribeInput" }
+      responses:
+        "201": { description: Subscribed }
+        "400": { description: Insufficient balance or below minimum }
+
+  /earn/positions:
+    get:
+      operationId: listEarnPositions
+      tags: [earn]
+      summary: List the authenticated user's active earn positions
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EarnPosition" }
+
+  /earn/redeem:
+    post:
+      operationId: earnRedeem
+      tags: [earn]
+      summary: Redeem (unstake) an earn position
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EarnRedeemInput" }
+      responses:
+        "200": { description: Redeemed }
+        "400": { description: Lock period not elapsed or invalid amount }
+
+  # ─── Admin — Coins ────────────────────────────────────────────────────────
+  /admin/coins:
+    get:
+      operationId: adminListCoins
+      tags: [admin-coins]
+      summary: List all coins (admin)
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Coin" }
+    post:
+      operationId: adminCreateCoin
+      tags: [admin-coins]
+      summary: Create a new coin
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCoinInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Coin" }
+
+  /admin/coins/{id}:
+    patch:
+      operationId: adminUpdateCoin
+      tags: [admin-coins]
+      summary: Update coin fields
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCoinInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Coin" }
+    delete:
+      operationId: adminDeleteCoin
+      tags: [admin-coins]
+      summary: Delete a coin
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204": { description: Deleted }
+
+  # ─── Admin — Pairs ────────────────────────────────────────────────────────
+  /admin/pairs:
+    get:
+      operationId: adminListPairs
+      tags: [admin-pairs]
+      summary: List all trading pairs (admin)
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Pair" }
+    post:
+      operationId: adminCreatePair
+      tags: [admin-pairs]
+      summary: Create a new trading pair
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePairInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Pair" }
+
+  /admin/pairs/{id}:
+    patch:
+      operationId: adminUpdatePair
+      tags: [admin-pairs]
+      summary: Update a trading pair
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePairInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Pair" }
+    delete:
+      operationId: adminDeletePair
+      tags: [admin-pairs]
+      summary: Delete a trading pair
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204": { description: Deleted }
+
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: cx_session
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
 
+    OkResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+      required: [ok]
+
+    Coin:
+      type: object
+      properties:
+        id: { type: integer }
+        symbol: { type: string }
+        name: { type: string }
+      required: [id, symbol, name]
+
+    Merchant:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        handle: { type: string }
+        kycLevel: { type: integer }
+        vipTier: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, handle, kycLevel, vipTier, createdAt]
+
+    P2pPaymentMethod:
+      type: object
+      properties:
+        id: { type: integer }
+        method: { type: string, enum: [upi, imps, neft, bank, paytm, phonepe, gpay] }
+        label: { type: string }
+        account: { type: string }
+        ifsc: { type: string, nullable: true }
+        holderName: { type: string, nullable: true }
+        active: { type: boolean }
+      required: [id, method, label, account, active]
+
+    P2pPaymentMethodInput:
+      type: object
+      required: [method, label, account]
+      properties:
+        method: { type: string, enum: [upi, imps, neft, bank, paytm, phonepe, gpay] }
+        label: { type: string, minLength: 1, maxLength: 60 }
+        account: { type: string, minLength: 1, maxLength: 120 }
+        ifsc: { type: string, maxLength: 20 }
+        holderName: { type: string, maxLength: 80 }
+
+    P2pSellerMethod:
+      type: object
+      description: Privacy-preserving view of a seller's payment method (no account number).
+      properties:
+        id: { type: integer }
+        method: { type: string, enum: [upi, imps, neft, bank, paytm, phonepe, gpay] }
+        label: { type: string }
+      required: [id, method, label]
+
+    P2pOffer:
+      type: object
+      properties:
+        id: { type: integer }
+        uid: { type: string }
+        userId: { type: integer }
+        side: { type: string, enum: [buy, sell] }
+        fiat: { type: string }
+        price: { type: number }
+        totalQty: { type: number }
+        availableQty: { type: number }
+        minFiat: { type: number }
+        maxFiat: { type: number }
+        paymentMethods:
+          type: array
+          items: { type: string }
+        payWindowMins: { type: integer }
+        terms: { type: string, nullable: true }
+        status: { type: string, enum: [online, offline, closed, suspended] }
+        minKycLevel: { type: integer }
+        minTrades: { type: integer }
+        coin:
+          oneOf:
+            - $ref: "#/components/schemas/Coin"
+            - type: "null"
+        merchant: { $ref: "#/components/schemas/Merchant" }
+        createdAt: { type: string, format: date-time }
+      required: [id, uid, userId, side, fiat, price, totalQty, availableQty, minFiat, maxFiat, paymentMethods, payWindowMins, status, minKycLevel, minTrades, merchant, createdAt]
+
+    P2pOfferInput:
+      type: object
+      required: [side, coinSymbol, price, totalQty, minFiat, maxFiat, paymentMethods]
+      properties:
+        side: { type: string, enum: [buy, sell] }
+        coinSymbol: { type: string, minLength: 1, maxLength: 20 }
+        fiat: { type: string, minLength: 2, maxLength: 8, default: INR }
+        price: { type: number, exclusiveMinimum: 0 }
+        totalQty: { type: number, exclusiveMinimum: 0 }
+        minFiat: { type: number, exclusiveMinimum: 0 }
+        maxFiat: { type: number, exclusiveMinimum: 0 }
+        paymentMethods:
+          type: array
+          minItems: 1
+          maxItems: 7
+          items: { type: string, enum: [upi, imps, neft, bank, paytm, phonepe, gpay] }
+        payWindowMins: { type: integer, enum: [15], default: 15, description: "Pay window is fixed at 15 minutes in this release." }
+        terms: { type: string, maxLength: 500 }
+        minKycLevel: { type: integer, minimum: 0, maximum: 3, default: 1 }
+        minTrades: { type: integer, minimum: 0, maximum: 10000, default: 0 }
+
+    # User self-edit: only price / limits / terms / status (online↔offline / closed).
+    P2pOfferPatch:
+      type: object
+      properties:
+        status: { type: string, enum: [online, offline, closed] }
+        price: { type: number, exclusiveMinimum: 0 }
+        minFiat: { type: number, exclusiveMinimum: 0 }
+        maxFiat: { type: number, exclusiveMinimum: 0 }
+        terms: { type: string, maxLength: 500 }
+
+    # Admin status change — adds the "suspended" verdict only admins can apply.
+    P2pAdminOfferPatch:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [online, offline, suspended, closed] }
+
+    P2pOrder:
+      type: object
+      properties:
+        id: { type: integer }
+        uid: { type: string }
+        offerId: { type: integer }
+        buyerId: { type: integer }
+        sellerId: { type: integer }
+        fiat: { type: string }
+        price: { type: number }
+        qty: { type: number }
+        fiatAmount: { type: number }
+        paymentMethod: { type: string }
+        paymentAccount: { type: string }
+        paymentLabel: { type: string }
+        paymentIfsc: { type: string, nullable: true }
+        paymentHolderName: { type: string, nullable: true }
+        paymentUtr: { type: string, nullable: true }
+        status: { type: string, enum: [pending, paid, released, cancelled, disputed, expired] }
+        paidAt: { type: string, format: date-time, nullable: true }
+        releasedAt: { type: string, format: date-time, nullable: true }
+        cancelledAt: { type: string, format: date-time, nullable: true }
+        expiresAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        disputeReason: { type: string, nullable: true }
+        disputeOpenedBy: { type: integer, nullable: true }
+        disputeOpenedAt: { type: string, format: date-time, nullable: true }
+        role: { type: string, enum: [buyer, seller, admin] }
+        coin:
+          oneOf:
+            - $ref: "#/components/schemas/Coin"
+            - type: "null"
+        buyer: { $ref: "#/components/schemas/Merchant" }
+        seller: { $ref: "#/components/schemas/Merchant" }
+      required: [id, uid, offerId, buyerId, sellerId, fiat, price, qty, fiatAmount, paymentMethod, paymentAccount, paymentLabel, status, expiresAt, createdAt, role, buyer, seller]
+
+    # The admin disputes endpoint enriches the order with the evidenceUrl
+    # captured at dispute-open time (left-joined from p2p_disputes; null
+    # for legacy disputes opened before migration 008).
+    P2pAdminDispute:
+      allOf:
+        - $ref: "#/components/schemas/P2pOrder"
+        - type: object
+          properties:
+            disputeEvidenceUrl: { type: string, nullable: true }
+
+    # Server accepts EITHER fiatAmount OR qty, exactly one — the other is
+    # derived from the offer's frozen price. We model both as optional in
+    # the schema and document the constraint here; the runtime z.superRefine
+    # rejects "both" or "neither" with a 400.
+    P2pOrderInput:
+      type: object
+      required: [offerId, paymentMethodId]
+      properties:
+        offerId: { type: integer, minimum: 1 }
+        fiatAmount: { type: number, exclusiveMinimum: 0, description: "Provide EITHER fiatAmount OR qty (exactly one)." }
+        qty: { type: number, exclusiveMinimum: 0, description: "Provide EITHER fiatAmount OR qty (exactly one)." }
+        paymentMethodId: { type: integer, minimum: 1 }
+
+    P2pMessage:
+      type: object
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        senderId: { type: integer }
+        senderRole: { type: string, enum: [buyer, seller, admin, system] }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, orderId, senderId, senderRole, body, createdAt]
+
+    P2pMarkPaidInput:
+      type: object
+      properties:
+        utr: { type: string, maxLength: 60 }
+
+    P2pDisputeInput:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string, minLength: 10, maxLength: 500 }
+        evidenceUrl:
+          type: string
+          format: uri
+          maxLength: 500
+          pattern: '^https?://'
+          description: Optional http(s) URL to a screenshot or document supporting the claim. Only http and https schemes are accepted; other schemes (e.g. javascript:, data:, file:) are rejected by the server to prevent admin-facing link injection.
+
+    P2pMessageInput:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, minLength: 1, maxLength: 1000 }
+
+    P2pAdminStats:
+      type: object
+      properties:
+        onlineOffers: { type: integer }
+        activeOrders: { type: integer }
+        openDisputes: { type: integer }
+        completedOrders: { type: integer }
+      required: [onlineOffers, activeOrders, openDisputes, completedOrders]
+
+    P2pResolveDisputeInput:
+      type: object
+      required: [action, notes]
+      properties:
+        action: { type: string, enum: [release, refund] }
+        notes:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: Mandatory written rationale for the resolution. Stored on the dispute and posted as an admin chat message visible to both parties.
+
+    RegisterInput:
+      type: object
+      required: [email, password, name]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        name: { type: string, minLength: 1, maxLength: 100 }
+        referralCode: { type: string }
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    AuthResponse:
+      type: object
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        requires2fa: { type: boolean }
+        token: { type: string, description: "JWT Bearer token (Flutter clients only)" }
+
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string }
+        name: { type: string }
+        role: { type: string }
+        status: { type: string }
+        kycLevel: { type: integer }
+        vipTier: { type: integer }
+        referralCode: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, email, name, role, status]
+
+    Order:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        pairId: { type: integer }
+        side: { type: string, enum: [buy, sell] }
+        type: { type: string, enum: [limit, market, stop_market, post_only] }
+        qty: { type: string }
+        price: { type: string, nullable: true }
+        filledQty: { type: string }
+        status: { type: string, enum: [open, partial, filled, cancelled, partial_cancelled, pending_trigger, rejected] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, userId, pairId, side, type, qty, filledQty, status]
+
+    PlaceOrderInput:
+      type: object
+      required: [pairId, side, type, qty]
+      properties:
+        pairId: { type: integer, minimum: 1 }
+        side: { type: string, enum: [buy, sell] }
+        type: { type: string, enum: [limit, market, stop_market, post_only] }
+        qty: { type: number, exclusiveMinimum: 0 }
+        price: { type: number, exclusiveMinimum: 0, description: "Required for limit / post_only orders" }
+        stopPrice: { type: number, exclusiveMinimum: 0, description: "Required for stop_market orders" }
+
+    Fill:
+      type: object
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        price: { type: string }
+        qty: { type: string }
+        fee: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, orderId, price, qty, fee]
+
+    FuturesOrder:
+      type: object
+      properties:
+        id: { type: string, description: "uid or numeric id" }
+        type: { type: string }
+        side: { type: string, enum: [buy, sell] }
+        amount: { type: string }
+        price: { type: string, nullable: true }
+        leverage: { type: integer }
+        status: { type: string }
+        symbol: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    PlaceFuturesOrderInput:
+      type: object
+      required: [currency, pair, side, amount]
+      properties:
+        currency: { type: string, description: "Quote currency symbol (e.g. USDT)" }
+        pair: { type: string, description: "Base asset symbol (e.g. BTC)" }
+        type: { type: string, enum: [limit, market], default: limit }
+        side: { type: string, enum: [buy, sell] }
+        amount: { type: number, exclusiveMinimum: 0 }
+        price: { type: number, exclusiveMinimum: 0, description: "Required for limit orders" }
+        leverage: { type: integer, minimum: 1, maximum: 125, default: 10 }
+        reduceOnly: { type: boolean, default: false }
+        stopLossPrice: { type: number, exclusiveMinimum: 0 }
+        takeProfitPrice: { type: number, exclusiveMinimum: 0 }
+
+    FuturesPosition:
+      type: object
+      properties:
+        id: { type: string }
+        symbol: { type: string }
+        side: { type: string, enum: [buy, sell] }
+        qty: { type: string }
+        entryPrice: { type: string }
+        markPrice: { type: string }
+        leverage: { type: integer }
+        unrealizedPnl: { type: string }
+        liquidationPrice: { type: string }
+        marginAmount: { type: string }
+        status: { type: string }
+
+    PriceAlert:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        coinSymbol: { type: string }
+        condition: { type: string, enum: [above, below] }
+        targetPrice: { type: string }
+        status: { type: string, enum: [active, triggered, disabled] }
+        note: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, userId, coinSymbol, condition, targetPrice, status]
+
+    CreatePriceAlertInput:
+      type: object
+      required: [symbol, condition, targetPrice]
+      properties:
+        symbol: { type: string, minLength: 1, maxLength: 20, description: "Coin symbol e.g. BTC" }
+        condition: { type: string, enum: [above, below] }
+        targetPrice: { type: number, exclusiveMinimum: 0 }
+        note: { type: string, maxLength: 200 }
+
+    UpdatePriceAlertInput:
+      type: object
+      properties:
+        targetPrice: { type: number, exclusiveMinimum: 0 }
+        condition: { type: string, enum: [above, below] }
+        note: { type: string, maxLength: 200, nullable: true }
+
+    DepositAddress:
+      type: object
+      properties:
+        address: { type: string }
+        memo: { type: string, nullable: true }
+        networkId: { type: integer }
+        coinId: { type: integer }
+        status: { type: string }
+      required: [address, networkId, coinId, status]
+
+    Network:
+      type: object
+      properties:
+        id: { type: integer }
+        coinId: { type: integer }
+        name: { type: string }
+        chain: { type: string }
+        contractAddress: { type: string, nullable: true }
+        minDeposit: { type: string }
+        minWithdrawal: { type: string }
+        withdrawalFee: { type: string }
+        status: { type: string, enum: [active, maintenance, inactive] }
+        confirmations: { type: integer }
+      required: [id, coinId, name, chain, status]
+
+    EarnProduct:
+      type: object
+      properties:
+        id: { type: integer }
+        coinId: { type: integer }
+        name: { type: string }
+        apy: { type: string }
+        minAmount: { type: string }
+        lockDays: { type: integer }
+        status: { type: string }
+      required: [id, coinId, name, apy, minAmount, status]
+
+    EarnPosition:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        productId: { type: integer }
+        amount: { type: string }
+        interestEarned: { type: string }
+        status: { type: string }
+        startDate: { type: string, format: date-time }
+        endDate: { type: string, format: date-time, nullable: true }
+      required: [id, userId, productId, amount, status]
+
+    CreateCoinInput:
+      type: object
+      required: [symbol, name]
+      properties:
+        symbol: { type: string, minLength: 1, maxLength: 20 }
+        name: { type: string, minLength: 1, maxLength: 100 }
+        type: { type: string, enum: [crypto, fiat, stablecoin, token], default: crypto }
+        decimals: { type: integer, minimum: 0, maximum: 18, default: 8 }
+        logoUrl: { type: string, format: uri, nullable: true }
+        description: { type: string, maxLength: 2000, nullable: true }
+        status: { type: string, enum: [active, inactive, delisted], default: active }
+        isListed: { type: boolean, default: true }
+        priceSource: { type: string, enum: [binance, manual, coingecko], default: binance }
+        binanceSymbol: { type: string, maxLength: 20, nullable: true }
+        manualPrice: { type: number, minimum: 0, nullable: true }
+
+    Pair:
+      type: object
+      properties:
+        id: { type: integer }
+        symbol: { type: string }
+        baseCoinId: { type: integer }
+        quoteCoinId: { type: integer }
+        status: { type: string }
+        tradingEnabled: { type: boolean }
+        futuresEnabled: { type: boolean }
+        minQty: { type: string }
+        takerFee: { type: string }
+        makerFee: { type: string }
+      required: [id, symbol, baseCoinId, quoteCoinId, status]
+
+    CreatePairInput:
+      type: object
+      required: [symbol, baseCoinId, quoteCoinId]
+      properties:
+        symbol: { type: string, minLength: 1, maxLength: 30 }
+        baseCoinId: { type: integer, minimum: 1 }
+        quoteCoinId: { type: integer, minimum: 1 }
+        minQty: { type: number, minimum: 0, default: 0 }
+        maxQty: { type: number, minimum: 0, default: 0 }
+        pricePrecision: { type: integer, minimum: 0, maximum: 10, default: 2 }
+        qtyPrecision: { type: integer, minimum: 0, maximum: 10, default: 4 }
+        takerFee: { type: number, minimum: 0, maximum: 1, default: 0.001 }
+        makerFee: { type: number, minimum: 0, maximum: 1, default: 0.001 }
+        tradingEnabled: { type: boolean, default: true }
+        futuresEnabled: { type: boolean, default: false }
+        status: { type: string, enum: [active, inactive, delisted], default: active }
+
+    ChangePasswordInput:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string }
+        newPassword: { type: string, minLength: 8 }
+
+    ClosePositionsInput:
+      type: object
+      required: [currency, pair]
+      properties:
+        currency: { type: string, description: "Quote currency symbol (e.g. USDT)" }
+        pair: { type: string, description: "Base asset symbol (e.g. BTC)" }
+
+    SetLeverageInput:
+      type: object
+      required: [currency, pair, leverage]
+      properties:
+        currency: { type: string }
+        pair: { type: string }
+        leverage: { type: integer, minimum: 1, maximum: 125 }
+
+    EarnSubscribeInput:
+      type: object
+      required: [productId, amount]
+      properties:
+        productId: { type: integer, minimum: 1 }
+        amount: { type: number, exclusiveMinimum: 0 }
+
+    EarnRedeemInput:
+      type: object
+      required: [positionId]
+      properties:
+        positionId: { type: integer, minimum: 1 }
+        amount:
+          type: number
+          exclusiveMinimum: 0
+          description: Partial redeem amount. Omit to redeem the full position.
