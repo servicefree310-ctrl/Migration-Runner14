@@ -395,30 +395,40 @@ async function main() {
       lastPrice = (baseUsd / btcPrice).toFixed(8);
     }
 
-    await db.insert(pairsTable).values({
-      symbol,
-      baseCoinId,
-      quoteCoinId,
-      pricePrecision,
-      qtyPrecision,
-      minQty,
-      maxQty:          "9999999999",
-      takerFee:        "0.001",
-      makerFee:        "0.001",
-      tradingEnabled:  true,
-      futuresEnabled,
-      lastPrice,
-      volume24h:       "0",
-      quoteVolume24h:  "0",
-      high24h:         lastPrice,
-      low24h:          lastPrice,
-      change24h:       "0",
-      trades24h:       0,
-      status:          "active",
-      maxLeverage:     futuresEnabled ? 100 : 10,
-    });
-    pairCreated++;
-    console.log(`   ✅ ${symbol.padEnd(12)}`);
+    try {
+      await db.insert(pairsTable).values({
+        symbol,
+        baseCoinId,
+        quoteCoinId,
+        pricePrecision,
+        qtyPrecision,
+        minQty,
+        maxQty:          "9999999999",
+        takerFee:        "0.001",
+        makerFee:        "0.001",
+        tradingEnabled:  true,
+        futuresEnabled,
+        lastPrice,
+        volume24h:       "0",
+        quoteVolume24h:  "0",
+        high24h:         lastPrice,
+        low24h:          lastPrice,
+        change24h:       "0",
+        trades24h:       0,
+        status:          "active",
+        maxLeverage:     futuresEnabled ? 100 : 10,
+      });
+      pairCreated++;
+      console.log(`   ✅ ${symbol.padEnd(12)}`);
+    } catch (err: any) {
+      const msg: string = err?.message ?? String(err);
+      if (msg.includes("already exists") || msg.includes("duplicate") || msg.includes("unique")) {
+        pairSkipped++;
+      } else {
+        console.warn(`   ⚠  ${symbol}: ${msg.split("\n")[0]}`);
+        pairSkipped++;
+      }
+    }
   }
   console.log(`\n   Pairs: ${pairCreated} created, ${pairSkipped} already existed`);
 
